@@ -4,15 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ConsoleApp2.Model
+namespace ConsoleApp2.Entity
 {
-    public class SC
-    {
+    internal class SIdScore
+    {  
         public string? SId { get; set; }
-
-        public string? CId { get; set; }
-
         public decimal Score { get; set; }
-
     }
 }
