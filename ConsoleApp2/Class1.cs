@@ -46,16 +46,27 @@ namespace ConsoleApp2
             };
         }
 
-        //  檢索" 01 "課程分數小於 60，按分數降序排列的學生資訊
-        //public List<Student2> GetStudentList2()
+        // 1. 01比02課程高分的學號
+        //select r.SId from Student RIGHT JOIN (select c1.SId, class1, class2 from
+        //      (select SId, score as class1 from sc where sc.CId = '01')as c1, 
+        //      (select SId, score as class2 from sc where sc.CId = '02')as c2
+        //       where c1.SId = c2.SId AND c1.class1 > c2.class2
+        //)as r
+        //on Student.SId = r.SId;
+
+        //public List<StudentID> Sql1()
         //{
-        //   return db.Queryable<SC>() // step1
-        //    .InnerJoin<Student>((sc, st) => sc.SId == st.SId) // step 2
-        //    .Where(sc => sc.Score < 60 && sc.CId == "01") // step3
-        //    .Select((sc, st) => new Student2 { SCCId = sc.CId, SCScore = sc.Score, Sname = st.Sname }) // step4
-        //    .MergeTable().OrderBy(x => x.SCScore, OrderByType.Desc) // step5
-        //    .ToList();
+        //    return db.Queryable((db.Queryable<SC>().Where(sc => sc.CId == "01"),
+        //                           db.Queryable<SC>().Where(sc => sc.CId == "02"),
+        //                           (sc1, sc2) => sc1.SId == sc2.SId))
+        //        .Where((sc1, sc2) => sc1.SId == sc2.SId)
+        //                .Where((sc1, sc2) => sc1.Score > sc2.Score)
+        //                .Select((sc1, sc2) => new StudentID { SID = sc1.SId })
+        //                .InnerJoin<Student>((sc1, st) => sc1.SId == st.SId)
+        //                .Select((sc1, st) => new StudentID { SID = sc1.SId })
+        //                .ToList();
         //}
+
 
         // 2. 查詢平均成績大於60分的學生的學號和平均成績
         public List<StIdAvgScore> Sql2()
@@ -66,6 +77,40 @@ namespace ConsoleApp2
                 .Select(sc => new StIdAvgScore { StSId = sc.SId, AvgScore = SqlFunc.AggregateAvg(sc.Score), })
                 .ToList();
         }
+        // 3.
+        // select St.sid '學號', St.sname '姓名', countCid '選課數', sumScore '總成績'
+        //from Student St
+        //left join
+        //(select SId, count(CId) countCid, sum(score) sumScore
+        //from sc group by sid )sc
+        //on St.SId = sc.sid;
+
+
+        //public List<StCourse> Sql3()
+        //{
+        //    var list = db.Queryable<SC>()
+        //                .GroupBy(sc => sc.SId)
+        //                .Select(sc => new
+        //                {
+        //                    ScSId = sc.SId,
+        //                    Cnt = SqlFunc.AggregateCount(sc),
+        //                    SumScore = SqlFunc.AggregateSum(sc.Score),
+        //                });
+        //    return list;
+        //    var list2 = db.Queryable<Student>()
+        //                .LeftJoin(list, (st, sc) => sc.ScSId == st.SId)
+        //                .Select((st, sc) => new StCourse
+        //                {
+        //                    StudentName = st.Sname,
+        //                    StudentSId = sc.ScSId,
+        //                    CountCourse = sc.Cnt,
+        //                    SumScore = sc.SumScore,
+        //                })
+        //                .ToList();
+        //    return list2;
+
+        //}
+
 
         // 4. 查詢姓「猴」的老師的個數
         // 回傳的結果是個數，型別是 int
@@ -196,17 +241,21 @@ namespace ConsoleApp2
         }
 
         // 17. 按平均成績從高到低顯示所有學生的所有課程的成績以及平均成績(難)
-        //select Sc.SId, Sc.CId, Sc.score, AvgScore.average from SC
-        //join
-        //(select AVG(score) 'average', Sc.SId from SC as Sc
-        //join Course on Sc.CId = Course.CId
-        //group by Sc.SId) as AvgScore
-        //on SC.SId = AvgScore.SId
-        //order by AvgScore.average desc
+        /*
+        select Sc.SId, Sc.CId, Sc.score, AvgScore.average from SC
+        join
+        (select AVG(score) 'average', Sc.SId from SC as Sc
+        join Course on Sc.CId = Course.CId
+        group by Sc.SId) as AvgScore
+        on SC.SId = AvgScore.SId
+        order by AvgScore.average desc
+        */
 
-        //public List<> Sql17() { 
+        //public List<> Sql17()
+        //{
+            
+        //}
 
-        //} 
 
     }
 

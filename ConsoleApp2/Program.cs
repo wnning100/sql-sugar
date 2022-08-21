@@ -22,16 +22,23 @@ namespace Console_ConfigTest
             //}
 
             //單例 
-            //var list = Class1.Instance.GetStudentList2();
-            //for (int i = 0; i < list.Count; i++) { 
-           
-            //    Console.WriteLine($"{list[i].SCCId}, {list[i].SCScore}, {list[i].Sname}");
+            // 1
+            //var n1 = Class1.Instance.Sql1();
+            //Console.WriteLine(n1.Count);
+            //for (int i = 0; i < n1.Count; i++)
+            //{
+            //    Console.WriteLine($"學號:{n1[i].SID}");
             //}
+
             // 2
             var n2 = Class1.Instance.Sql2();
             for (int i = 0; i < n2.Count; i++) {
                 Console.WriteLine($"學號:{n2[i].StSId},平均成績:{n2[i].AvgScore}");
             }
+            // 3 
+            // var n3 = Class1.Instance.Sql3();
+            
+
             // 4
             var countTeacher = Class1.Instance.Sql4();
             Console.WriteLine($"{countTeacher}");
@@ -43,11 +50,12 @@ namespace Console_ConfigTest
                 Console.WriteLine($"學號:{n6[i].StudentId},姓名:{n6[i].StudentName}");
             }
             // 7 
-            var n7 = Class1.Instance.Sql7();
-            for (int i = 0; i < n7.Count; i++)
-            {
-                Console.WriteLine($"學號:{n7[i].StudentId},姓名:{n7[i].StudentName}");
-            }
+            //var n7 = Class1.Instance.Sql7();
+            //for (int i = 0; i < n7.Count; i++)
+            //{
+            //    Console.WriteLine($"學號:{n7[i].StudentId},姓名:{n7[i].StudentName}");
+            //}
+
             // 8
             var n8 = Class1.Instance.Sql8();
             Console.WriteLine($"總成績:{n8}");
@@ -73,7 +81,6 @@ namespace Console_ConfigTest
                 Console.WriteLine($"學號:{n16[i].StudentId},姓名:{n16[i].StudentName},性別:{n16[i].StudentSex},生日:{n16[i].StudentAge}");           
             }
 
-            
 
             // 17
             //var n17 = Class1.Instance.Sql17();
