@@ -44,6 +44,8 @@ namespace Console_ConfigTest
             var countTeacher = Class1.Instance.Sql4();
             Console.WriteLine(4);
             Console.WriteLine($"{countTeacher}");
+            // 5
+            //var n5 = Class1.Instance.Sql5();
 
             // 6
             var n6 = Class1.Instance.Sql6();
@@ -53,12 +55,12 @@ namespace Console_ConfigTest
                 Console.WriteLine($"學號:{n6[i].StudentId},姓名:{n6[i].StudentName}");
             }
             // 7 
-            //var n7 = Class1.Instance.Sql7();
-            //Console.WriteLine(7);
-            //for (int i = 0; i < n7.Count; i++)
-            //{
-            //    Console.WriteLine($"學號:{n7[i].StudentId},姓名:{n7[i].StudentName}");
-            //}
+            var n7 = Class1.Instance.Sql7();
+            Console.WriteLine(7);
+            for (int i = 0; i < n7.Count; i++)
+            {
+                Console.WriteLine($"學號:{n7[i].StudentId},姓名:{n7[i].StudentName}");
+            }
 
             // 8
             var n8 = Class1.Instance.Sql8();
@@ -72,6 +74,15 @@ namespace Console_ConfigTest
             {
                 Console.WriteLine($"學號:{n9[i].StudentId},姓名:{n9[i].StudentName}");
             }
+            // 10
+
+            // 11
+
+            // 12
+
+            // 13
+
+            // 14
 
             // 15
             var n15 = Class1.Instance.Sql15();
@@ -92,6 +103,20 @@ namespace Console_ConfigTest
 
             // 17
             //var n17 = Class1.Instance.Sql17();
+            // 18
+            var n18 = Class1.Instance.Sql18();
+            Console.WriteLine(18);
+            foreach (var item in n18)
+            {
+                Console.WriteLine($"課程名稱:{item.CourseName},最高分:{item.MaxScore},最低分:{item.MinScore},平均分數:{item.AvgScore}");
+            }
+            // 20
+            var n20 = Class1.Instance.Sql20();
+            Console.WriteLine(20);
+            foreach (var item in n20)
+            {
+                Console.WriteLine($"老師:{item.TeacherName},課號:{item.CourseId},平均分數:{item.AvgScore}");
+            }
 
             var n26 = Class1.Instance.Sql26();
             Console.WriteLine(26);
@@ -99,7 +124,39 @@ namespace Console_ConfigTest
             {
                 Console.WriteLine($"課號:{item.CourseID},課程名稱:{item.CourseName},[100-85]:{item.Case100To85},[85-70]:{item.Case85To70},[70-60]:{item.Case70To60},[<60]:{item.CaseFail}");
             }
-            
+            var n29 = Class1.Instance.Sql29();
+            Console.WriteLine(29);
+            foreach (var item in n29)
+            {
+                Console.WriteLine($"性別:{item.Sex},人數:{item.GenderAmount}");
+            }
+            var n30 = Class1.Instance.Sql30();
+            Console.WriteLine(30);
+            foreach (var item in n30)
+            {
+                Console.WriteLine($"{item.Sname},{item.Ssex},{item.Sage}");
+            }
+            var n33 = Class1.Instance.Sql33();
+            Console.WriteLine(33);
+            foreach (var item in n33)
+            {
+                Console.WriteLine($"{item.CId},{item.AvgScore}");
+            }
+            // 分组查询和使用
+            var n42 = Class1.Instance.Sql42();
+            Console.WriteLine(42);
+            foreach (var item in n42)
+            {
+                Console.WriteLine($"課號:{item.CId},選修人數:{item.CountAmount}");
+            }
+
+            var n43 = Class1.Instance.Sql43();
+            Console.WriteLine(43);
+            foreach (var item in n43)
+            {
+                Console.WriteLine($"學號:{item.SID}");
+            }
+
             // Doc
             // **基本查询**
             // 查詢表的所有
@@ -177,18 +234,7 @@ namespace Console_ConfigTest
                 Console.WriteLine($"{orderRandom[i].SId},{orderRandom[i].Sname}");
             }
 
-            // 分组查询和使用
-            var n42 = Class1.Instance.Sql42();
-            foreach (var item in n42)
-            {
-                Console.WriteLine($"課號:{item.CId},選修人數:{item.CountAmount}");
-            }
-
-            var n43 = Class1.Instance.Sql43();
-            foreach (var item in n43)
-            {
-                Console.WriteLine($"學號:{item.SID}");
-            }
+            
             Console.ReadKey();
 
         }
