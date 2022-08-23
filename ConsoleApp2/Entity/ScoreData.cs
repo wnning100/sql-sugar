@@ -8,9 +8,9 @@ namespace ConsoleApp2.Entity
 {
     internal class ScoreData
     {
-        public string? CourseName;
-        public decimal? MaxScore;
-        public decimal? MinScore;
-        public decimal? AvgScore;
+        public string? CourseName { get; set; }
+        public decimal? MaxScore { get; set; }
+        public decimal? MinScore { get; set; }
+        public decimal? AvgScore { get; set; }
     }
 }

@@ -58,7 +58,7 @@ namespace ConsoleApp2
                 .Select(sc => new StIdAvgScore { StSId = sc.SId, AvgScore = SqlFunc.AggregateAvg(sc.Score), })
                 .ToList();
         }
-        // 3.
+        // 3.查詢所有學生的學號、姓名、選課數、總成績
         // select St.sid '學號', St.sname '姓名', countCid '選課數', sumScore '總成績'
         //from Student St
         //left join
