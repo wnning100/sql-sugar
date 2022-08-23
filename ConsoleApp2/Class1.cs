@@ -46,26 +46,6 @@ namespace ConsoleApp2
             };
         }
 
-        // 1. 01比02課程高分的學號
-        //select r.SId from Student RIGHT JOIN (select c1.SId, class1, class2 from
-        //      (select SId, score as class1 from sc where sc.CId = '01')as c1, 
-        //      (select SId, score as class2 from sc where sc.CId = '02')as c2
-        //       where c1.SId = c2.SId AND c1.class1 > c2.class2
-        //)as r
-        //on Student.SId = r.SId;
-
-        //public List<StudentID> Sql1()
-        //{
-        //    return db.Queryable((db.Queryable<SC>().Where(sc => sc.CId == "01"),
-        //                           db.Queryable<SC>().Where(sc => sc.CId == "02"),
-        //                           (sc1, sc2) => sc1.SId == sc2.SId))
-        //        .Where((sc1, sc2) => sc1.SId == sc2.SId)
-        //                .Where((sc1, sc2) => sc1.Score > sc2.Score)
-        //                .Select((sc1, sc2) => new StudentID { SID = sc1.SId })
-        //                .InnerJoin<Student>((sc1, st) => sc1.SId == st.SId)
-        //                .Select((sc1, st) => new StudentID { SID = sc1.SId })
-        //                .ToList();
-        //}
 
 
         // 2. 查詢平均成績大於60分的學生的學號和平均成績
@@ -147,7 +127,7 @@ namespace ConsoleApp2
 
         // 8. 查詢課程編號為「02」的總成績
         public decimal Sql8()
-        { 
+        {
             return db.Queryable<SC>()
                 .Where(sc => sc.CId == "02")
                 .Sum(sc => sc.Score);
@@ -182,7 +162,7 @@ namespace ConsoleApp2
         //               .ToList();
         //}
 
-        public List<SIdSname> Sql9() { 
+        public List<SIdSname> Sql9() {
             return db.Queryable<Student>()
                        .InnerJoin(db.Queryable<SC>().Select<SIdScore>(sc => new SIdScore { SId = sc.SId, Score = sc.Score })
                                   , (st, sidscore) => st.SId == sidscore.SId)
@@ -232,11 +212,11 @@ namespace ConsoleApp2
         //where Sc.CId = '01' and Sc.score< 60
         //order by Sc.score desc
 
-        public List<StudentData> Sql16()
-        { 
+        public List<StudentDetail> Sql16()
+        {
             return db.Queryable<SC, Student>((sc, st) => sc.SId == st.SId && sc.CId == "01" && sc.Score < 60)
                 .OrderBy((sc, st) => sc.Score, OrderByType.Desc)
-                .Select((sc, st) => new StudentData { StudentId = st.SId, StudentName = st.Sname, StudentSex = st.Ssex, StudentAge = st.Sage })
+                .Select((sc, st) => new StudentDetail { StudentId = st.SId, StudentName = st.Sname, StudentSex = st.Ssex, StudentAge = st.Sage })
                 .ToList();
         }
 
@@ -253,12 +233,200 @@ namespace ConsoleApp2
 
         //public List<> Sql17()
         //{
-            
+
         //}
+
+        // 26題 Case when
+        /*
+        SELECT Sc.CId, c.Cname,
+        SUM(CASE WHEN Sc.score< 100 AND Sc.score >= 85 THEN 1 ELSE 0 END) AS "100-85",
+        SUM(CASE WHEN Sc.score< 85 AND Sc.score >= 70 THEN 1 ELSE 0 END) AS "85-70",
+        SUM(CASE WHEN Sc.score< 70 AND Sc.score >= 60 THEN 1 ELSE 0 END) AS "70-60",
+        SUM(CASE WHEN Sc.score< 60 THEN 1 ELSE 0 END) AS "<60"
+        FROM SC Sc JOIN Course C ON C.CId = Sc.CId
+        GROUP BY Sc.CId, C.Cname;
+        */
+        // case when sugar用法
+        //SqlFunc.IF(st.Id > 1)
+        // .Return(st.Id)
+        // .ElseIF(st.Id == 1)
+        // .Return(st.SchoolId).End(st.Id)
+
+        public List<CourseStatistics> Sql26()
+        {
+            return db.Queryable<SC, Course>((sc, c) => sc.CId == c.CId)
+                .GroupBy((sc, c) => new { sc.CId, c.Cname })
+                .Select((sc, c) => new CourseStatistics
+                {
+                    CourseID = sc.CId,
+                    CourseName = c.Cname,
+                    Case100To85 = SqlFunc.AggregateSum(SqlFunc.IF(sc.Score < 100 && sc.Score >= 85).Return(1).End(0)),
+                    Case85To70 = SqlFunc.AggregateSum(SqlFunc.IF(sc.Score < 85 && sc.Score >= 70).Return(1).End(0)),
+                    Case70To60 = SqlFunc.AggregateSum(SqlFunc.IF(sc.Score < 70 && sc.Score >= 60).Return(1).End(0)),
+                    CaseFail = SqlFunc.AggregateSum(SqlFunc.IF(sc.Score < 60).Return(1).End(0))
+                })
+                .ToList();
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // Doc
+        // **基本查询**
+        // 查詢表的所有
+        public List<Course> GetCourseList()
+        {
+            return db.Queryable<Course>().ToList();
+        }
+        // 模糊查詢
+        public List<Student> GetName()
+        {
+            return db.Queryable<Student>().Where(it => it.Sname.Contains("四")).ToList();
+
+        }
+        // 查詢前幾條
+        public List<Student> Get5()
+        {
+            return db.Queryable<Student>().Take(5).ToList();
+        }
+        // 查詢最大值
+        public decimal GetMax()
+        {
+            return db.Queryable<SC>().Max(it => it.Score);
+        }
+        // 查詢第一條
+        public StudentData GetFirst()
+        {
+            return db.Queryable<StudentData>()
+                .First(it => it.ID == 1);
+        }
+
+        // 根据主键查询
+        public StudentData GetPk()
+        {
+            // return db.Queryable<StudentData>().Single(it => it.ID == 2);
+            return db.Queryable<StudentData>().InSingle(2); // Model要設主鍵
+        }
+        // 多條件查詢
+        public List<StudentData> GetMany()
+        {
+            return db.Queryable<StudentData>().Where(it => it.ID < 10 && it.Name.Contains("明")).ToList();
+        }
+        // 查詢是否存在记录
+        public bool IfExist()
+        {
+            return db.Queryable<StudentData>().Where(it => it.ID > 11).Any();
+        }
+        // 数据行数
+        public int GetCount()
+        {
+            return db.Queryable<StudentData>().Where(it => it.ID < 10).Count();
+        }
+        // 求和
+        public decimal GetSum()
+        {
+            return db.Queryable<SC>().Sum(it => it.Score);
+        }
+
+        // 查詢最後一條
+        // In查询,IN的使用
+        // 动态OR查询
+        // 查询过滤某一个字段
+
+        // **分頁查詢**
+        int pageIndex = 1; // pageindex是从1开始的不是从零开始的
+        // 若pageIndex = 2 則顯示第二頁的結果
+        int pageSize = 5; // 表示一頁顯示幾筆資料
+        int totalCount = 0;
+        //单表分页
+        public List<Student> GetSinglePage()
+        {
+            return db.Queryable<Student>().ToPageList(pageIndex, pageSize, ref totalCount);
+        }
+        // 多表分頁
+        public List<Student> GetManyTablesPage()
+        {
+            return db.Queryable<Student>().LeftJoin<SC>((st, sc) => st.SId == sc.SId)
+                .Distinct().Select((st, sc) => new Student { SId = st.SId, Sname = st.Sname, Sage = st.Sage, Ssex = st.Ssex })
+                .ToPageList(pageIndex, pageSize, ref totalCount);
+        }
+        // 如何获取 row_index 的值
+
+        // ** 排序 OrderBy **
+        // 表達式排序
+        public List<Student> GetOrders()
+        {
+            return db.Queryable<Student>().OrderBy(it => it.Sname).OrderBy(it => it.SId, OrderByType.Desc).ToList(); // 名字一樣的時候id大到小排序
+        }
+        // 动态排序
+        // 随机排序取5条資料
+        public List<Student> Getrandom()
+        {
+            return db.Queryable<Student>().OrderBy(st => SqlFunc.GetRandom()).Take(5).ToList();
+        }
+        // OrderByIF
+
+        // ** 动态表达式 **
+
+        // ** 分组查询、重复、去重 **
+        // 分组查询和使用
+        // 統計每門課程的學生選修人數（超過5人的課程才統計）。要求輸出課程號和選修人數，查詢結果按人數降序排列，若人數相同，按課程號升序排列
+        public List<CountCourse> Sql42()
+        {
+            return db.Queryable<SC>()
+                .GroupBy(sc => sc.CId)
+                .Having(sc => SqlFunc.AggregateCount(sc.CId) > 5)
+                .OrderBy(sc => SqlFunc.AggregateCount(sc.CId), OrderByType.Desc)
+                .Select(sc => new CountCourse { CId = sc.CId, CountAmount = SqlFunc.AggregateCount(sc.CId) })
+                .ToList();
+        }
+        // 至少選修兩門課程的學生學號
+        public List<StudentID> Sql43()
+        {
+            return db.Queryable<SC>()
+                .GroupBy(sc => new { sc.SId })
+                .Having(sc => SqlFunc.AggregateCount(sc.CId) >= 2)
+                .Select(sc => new StudentID { SID = sc.SId })
+                .ToList();
+
+        }
+        //select St.sid '學號', St.sname '姓名', countCid '選課數', sumScore '總成績'
+        //from Student St
+        //left join
+        //(select SId, count(CId) countCid, sum(score) sumScore
+        //from sc group by sid )sc
+        //on St.SId = sc.sid;
+
+
+        //public List<Student> GetCourse()
+        //{ 
+        //    return db.Queryable<Student>()
+        //        .LeftJoin(db.Queryable<SC>().Select(sc => sc.SId, SqlFunc.AggregateCount(sc.CId), SqlFunc.AggregateSum(sc.score)))
+        //}
+
+        // 特殊日期分组
+        // Count(distinct 字段)
+        // 分组获取第一条
+        // 联表中GroupBy用法
+        // ** 子查詢 **
+        // ** 嵌套查詢 **
+        // CRUD
+
+
+        
+
 
 
     }
-
-
 
 }

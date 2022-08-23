@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ConsoleApp2.Entity
 {
-    internal class StudentData
+    internal class StudentDetail
     {
         public string? StudentId { get; set; }
         public string? StudentName { get; set; }
