@@ -37,8 +37,12 @@ namespace Console_ConfigTest
                 Console.WriteLine($"學號:{n2[i].StSId},平均成績:{n2[i].AvgScore}");
             }
             // 3 
-            // var n3 = Class1.Instance.Sql3();
-
+            var n3 = Class1.Instance.Sql3();
+            Console.WriteLine(3);
+            for (int i = 0; i < n3.Count; i++)
+            {
+                Console.WriteLine($"學號:{n3[i].StudentSId},姓名:{n3[i].StudentName},選課數:{n3[i].CountCourse},總成績:{n3[i].SumScore}");
+            }
 
             // 4
             var countTeacher = Class1.Instance.Sql4();
@@ -171,12 +175,12 @@ namespace Console_ConfigTest
                 Console.WriteLine($"{item.Sname},{item.Ssex},{item.Sage}");
             }
             // 31
-            //var n31 = Class1.Instance.Sql31();
-            //Console.WriteLine(31);
-            //foreach (var item in n31)
-            //{
-            //    Console.WriteLine($"1990出生的學生名單:{item.Sname},{item.Ssex},{item.Sage}");
-            //}
+            var n31 = Class1.Instance.Sql31();
+            Console.WriteLine(31);
+            foreach (var item in n31)
+            {
+                Console.WriteLine($"1990出生的學生名單:{item.Sname},{item.Ssex},{item.Sage}");
+            }
             // 33
             var n33 = Class1.Instance.Sql33();
             Console.WriteLine(33);

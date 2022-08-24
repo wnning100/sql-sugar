@@ -10,8 +10,8 @@ namespace ConsoleApp2.Entity
     {
         public string? StudentSId { get; set; }
         public string? StudentName { get; set; }
-        public decimal SumScore { get; set; }
-        public int CountCourse { get; set; }
+        public decimal? SumScore { get; set; }
+        public int? CountCourse { get; set; }
 
     }
 }

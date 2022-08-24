@@ -65,16 +65,15 @@ namespace ConsoleApp2
         //(select SId, count(CId) countCid, sum(score) sumScore
         //from sc group by sid )sc
         //on St.SId = sc.sid;
-        //public List<StCourse> Sql3()
-        //{
-        //    return db.Queryable<Student>()
-        //        .LeftJoin(db.Queryable<SC>().Select<SumScoreCount>(sc => new SumScoreCount { SId = sc.SId, CountCId = SqlFunc.AggregateCount(sc.CId), SumScore = SqlFunc.AggregateSum(sc.Score) })
-        //        , (st, sumscore) => st.SId == sumscore.SId)
-        //        .GroupBy((st, sumscore) => sumscore.SId)
-        //        .Select((st, sumscore) => new StCourse { StudentSId = st.SId, StudentName = st.Sname, CountCourse = SqlFunc.AggregateSum(sumscore.CountCId), SumScore = SqlFunc.AggregateSum(sumscore.SumScore)})
-        //        .ToList();
-        //}
-        
+        public List<StCourse> Sql3()
+        {
+            return db.Queryable<Student>()
+                .LeftJoin(db.Queryable<SC>().GroupBy(sc => sc.SId).Select<SumScoreCount>(sc => new SumScoreCount { SId = sc.SId, CountCId = SqlFunc.AggregateCount(sc.CId), SumScore = SqlFunc.AggregateSum(sc.Score) })
+                , (st, sumscore) => st.SId == sumscore.SId)
+                .Select((st, sumscore) => new StCourse { StudentSId = st.SId, StudentName = st.Sname, CountCourse = sumscore.CountCId, SumScore = sumscore.SumScore })
+                .ToList();
+        }
+
 
         // 4. 查詢姓「猴」的老師的個數
         // 回傳的結果是個數，型別是 int
@@ -145,11 +144,15 @@ namespace ConsoleApp2
         //}
 
         /*
-         select Sc.SId, Sc.CId, St.Sname
-            from (select SC.CId, SC.SId from SC where CId = '02' ) Sc
-            join Student St
-            on Sc.SId = St.SId
-            where Sc.CId = '01';
+         SELECT st.SId, st.Sname FROM Student st JOIN
+         (
+         SELECT r.SId FROM (
+          SELECT SId, CId FROM SC GROUP BY SId,CId HAVING(CId = 01 OR CId = 02)
+         ) r
+         GROUP BY r.SId
+         HAVING COUNT(*) = 2
+         ) result
+         ON result.SId = st.SId;
          */
         // 8. 查詢課程編號為「02」的總成績
         public decimal Sql8()
@@ -275,7 +278,8 @@ namespace ConsoleApp2
                                  SumScore = SqlFunc.AggregateSum(sc.Score),
                                  Rank = SqlFunc.RowNumber(SqlFunc.Desc(SqlFunc.AggregateSum(sc.Score)))
                              })
-                             .MergeTable().OrderBy(x => x.SumScore, OrderByType.Desc)
+                             .MergeTable()
+                             .OrderBy(x => x.SumScore, OrderByType.Desc)
                              .ToList();
         }
         // 20.查詢不同老師所教不同課程平均分,從高到低顯示
@@ -352,7 +356,6 @@ namespace ConsoleApp2
                 .Having((st, sc) => SqlFunc.AggregateCount(sc.CId) == 2)
                 .Select((st, sc) => new SIdSname { StudentId = st.SId, StudentName = st.Sname })
                 .ToList();
-                
         }
         // 29.查詢男生、女生人數
         /*
@@ -374,12 +377,12 @@ namespace ConsoleApp2
                 .ToList();
         }
         // 31.查詢1990年出生的學生名單
-        //public List<Student> Sql31()
-        //{
-        //    return db.Queryable<Student>()
-        //                     .Where(st => SqlFunc.DateValue(st.Sage) == 1990)
-        //                     .ToList();
-        //}
+        public List<Student> Sql31()
+        {
+            return db.Queryable<Student>()
+                             .Where(st => st.Sage.Value.Year == 1990)
+                             .ToList();
+        }
         // 32.查詢平均成績大於等於85的所有學生的學號、姓名和平均成績
 
         // 33.查詢每門課程的平均成績，結果按平均成績升序排序，平均成績相同時，按課程號降序排列
