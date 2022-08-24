@@ -45,12 +45,12 @@ namespace Console_ConfigTest
             Console.WriteLine(4);
             Console.WriteLine($"{countTeacher}");
             // 5
-            //var n5 = Class1.Instance.Sql5();
-            //Console.WriteLine(5);
-            //foreach (var item in n5)
-            //{
-            //    Console.WriteLine($"學號:{item.StudentId},姓名:{item.StudentName}");
-            //}
+            var n5 = Class1.Instance.Sql5();
+            Console.WriteLine(5);
+            foreach (var item in n5)
+            {
+                Console.WriteLine($"學號:{item.StudentId},姓名:{item.StudentName}");
+            }
             // 6
             var n6 = Class1.Instance.Sql6();
             Console.WriteLine(6);
@@ -59,12 +59,12 @@ namespace Console_ConfigTest
                 Console.WriteLine($"學號:{n6[i].StudentId},姓名:{n6[i].StudentName}");
             }
             // 7 
-            var n7 = Class1.Instance.Sql7();
-            Console.WriteLine(7);
-            for (int i = 0; i < n7.Count; i++)
-            {
-                Console.WriteLine($"學號:{n7[i].StudentId},姓名:{n7[i].StudentName}");
-            }
+            //var n7 = Class1.Instance.Sql7();
+            //Console.WriteLine(7);
+            //for (int i = 0; i < n7.Count; i++)
+            //{
+            //    Console.WriteLine($"學號:{n7[i].StudentId},姓名:{n7[i].StudentName}");
+            //}
 
             // 8
             var n8 = Class1.Instance.Sql8();
@@ -170,12 +170,40 @@ namespace Console_ConfigTest
             {
                 Console.WriteLine($"{item.Sname},{item.Ssex},{item.Sage}");
             }
+            // 31
+            //var n31 = Class1.Instance.Sql31();
+            //Console.WriteLine(31);
+            //foreach (var item in n31)
+            //{
+            //    Console.WriteLine($"1990出生的學生名單:{item.Sname},{item.Ssex},{item.Sage}");
+            //}
             // 33
             var n33 = Class1.Instance.Sql33();
             Console.WriteLine(33);
             foreach (var item in n33)
             {
                 Console.WriteLine($"{item.CId},{item.AvgScore}");
+            }
+            // 34
+            var n34 = Class1.Instance.Sql34();
+            Console.WriteLine(34);
+            foreach (var item in n34)
+            {
+                Console.WriteLine($"姓名:{item.Sname},課程名稱:{item.Cname},分數:{item.Score}");
+            }
+            // 35
+            var n35 = Class1.Instance.Sql35();
+            Console.WriteLine(35);
+            foreach (var item in n35)
+            {
+                Console.WriteLine($"姓名:{item.Sname},課程名稱:{item.Cname},分數:{item.Score}");
+            }
+            // 36
+            var n36 = Class1.Instance.Sql36();
+            Console.WriteLine(36);
+            foreach (var item in n36)
+            {
+                Console.WriteLine($"姓名:{item.Sname},課程名稱:{item.Cname},分數:{item.Score}");
             }
             // 37
             var n37 = Class1.Instance.Sql37();

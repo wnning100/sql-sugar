@@ -65,33 +65,16 @@ namespace ConsoleApp2
         //(select SId, count(CId) countCid, sum(score) sumScore
         //from sc group by sid )sc
         //on St.SId = sc.sid;
-
-
         //public List<StCourse> Sql3()
         //{
-        //    var list = db.Queryable<SC>()
-        //                .GroupBy(sc => sc.SId)
-        //                .Select(sc => new
-        //                {
-        //                    ScSId = sc.SId,
-        //                    Cnt = SqlFunc.AggregateCount(sc),
-        //                    SumScore = SqlFunc.AggregateSum(sc.Score),
-        //                });
-        //    return list;
-        //    var list2 = db.Queryable<Student>()
-        //                .LeftJoin(list, (st, sc) => sc.ScSId == st.SId)
-        //                .Select((st, sc) => new StCourse
-        //                {
-        //                    StudentName = st.Sname,
-        //                    StudentSId = sc.ScSId,
-        //                    CountCourse = sc.Cnt,
-        //                    SumScore = sc.SumScore,
-        //                })
-        //                .ToList();
-        //    return list2;
-
+        //    return db.Queryable<Student>()
+        //        .LeftJoin(db.Queryable<SC>().Select<SumScoreCount>(sc => new SumScoreCount { SId = sc.SId, CountCId = SqlFunc.AggregateCount(sc.CId), SumScore = SqlFunc.AggregateSum(sc.Score) })
+        //        , (st, sumscore) => st.SId == sumscore.SId)
+        //        .GroupBy((st, sumscore) => sumscore.SId)
+        //        .Select((st, sumscore) => new StCourse { StudentSId = st.SId, StudentName = st.Sname, CountCourse = SqlFunc.AggregateSum(sumscore.CountCId), SumScore = SqlFunc.AggregateSum(sumscore.SumScore)})
+        //        .ToList();
         //}
-
+        
 
         // 4. 查詢姓「猴」的老師的個數
         // 回傳的結果是個數，型別是 int
@@ -110,19 +93,20 @@ namespace ConsoleApp2
          WHERE t.Tname = '張三'
         );
          */
-        //public List<SIdSname> Sql5()
-        //{
-        //    return db.Queryable<Student>()
-        //        .Where(st => !st.SId.Contains(
-        //                db.Queryable<SC>()
-        //                .InnerJoin<Course>((sc, c) => sc.CId == c.CId)
-        //                .InnerJoin<Teacher>((sc, c, t) => c.TId == t.TId)
-        //                .Where((sc, c, t) => t.Tname == "張三")
-        //                )
-        //            )
-        //        .Select(st => new SIdSname { StudentName = st.Sname, StudentId = st.SId })
-        //        .ToList();
-        //}
+        // 用 in, not in效能不好
+        // https://www.donet5.com/Ask/9/16298
+        public List<SIdSname> Sql5()
+        {
+            var list = db.Queryable<Student>()
+                .Where(st => SqlFunc.Subqueryable<SC>()
+                        .InnerJoin<Course>((sc, c) => sc.CId == c.CId)
+                        .InnerJoin<Teacher>((sc, c, t) => c.TId == t.TId && t.Tname == "張三")
+                        .Where(sc => sc.SId == st.SId).NotAny()
+                    )
+                .Select(st => new SIdSname { StudentName = st.Sname, StudentId = st.SId })
+                .ToList();
+            return list;
+        }
 
 
         // 6. 查詢學過「張三」老師所教的所有課的同學的學號、姓名
@@ -138,6 +122,7 @@ namespace ConsoleApp2
 
         // 7. 查詢學過編號為「01」的課程並且也學過編號為「02」的課程的學生的學號、姓名
         // 不要自己join自己，可以用 where or and 等條件處理完再join
+        // from 後面盡量一張表就好
         //public List<SIdSname> Sql7()
         //{
         //    return db.Queryable(db.Queryable<SC>().Where(sc => sc.CId == "01"),
@@ -149,16 +134,23 @@ namespace ConsoleApp2
         //         .Select((sc1, st) => new SIdSname { StudentId = sc1.SId, StudentName = st.Sname })
         //         .ToList();
         //}
-        public List<SIdSname> Sql7()
-        {
-            return db.Queryable<Student>()
-                     .InnerJoin(db.Queryable<SC, SC>((sc1, sc2) => sc1.SId == sc2.SId && sc1.CId == "01" && sc2.CId == "02")
-                                  .Select((sc1, sc2) => new StudentID { SID = sc1.SId })
-                               , (st, sid) => st.SId == sid.SID)
-                      .Select(st => new SIdSname { StudentId = st.SId, StudentName = st.Sname })
-                      .ToList();
-        }
+        //public List<SIdSname> Sql7()
+        //{
+        //    return db.Queryable<Student>()
+        //             .InnerJoin(db.Queryable<SC, SC>((sc1, sc2) => sc1.SId == sc2.SId && sc1.CId == "01" && sc2.CId == "02")
+        //                          .Select((sc1, sc2) => new StudentID { SID = sc1.SId })
+        //                       , (st, sid) => st.SId == sid.SID)
+        //              .Select(st => new SIdSname { StudentId = st.SId, StudentName = st.Sname })
+        //              .ToList();
+        //}
 
+        /*
+         select Sc.SId, Sc.CId, St.Sname
+            from (select SC.CId, SC.SId from SC where CId = '02' ) Sc
+            join Student St
+            on Sc.SId = St.SId
+            where Sc.CId = '01';
+         */
         // 8. 查詢課程編號為「02」的總成績
         public decimal Sql8()
         {
@@ -171,8 +163,8 @@ namespace ConsoleApp2
         //SELECT DISTINCT St.SId, St.Sname FROM Student St
         //JOIN(SELECT DISTINCT Sc.SId from SC WHERE Sc.score< 60) Sc
         //ON St.SId = Sc.SId
-
-        public List<SIdSname> Sql9() {
+        public List<SIdSname> Sql9()
+        {
             return db.Queryable<Student>()
                        .InnerJoin(db.Queryable<SC>().Select<SIdScore>(sc => new SIdScore { SId = sc.SId, Score = sc.Score })
                                   , (st, sidscore) => st.SId == sidscore.SId)
@@ -182,40 +174,42 @@ namespace ConsoleApp2
                        .ToList();
         }
         // 10.查詢沒有學全所有課的學生的學號、姓名
+
         // 11.查詢至少有一門課與學號為「01」的學生所學課程相同的學生的學號和姓名 （難）
+
         // 12.查詢和「01」號同學所學課程完全相同的其他同學的學號（難）
 
         // 15.查詢兩門及其以上不及格課程的同學的學號，姓名及其平均成績
-        //public List<> Sq15()
-        //{ 
-        //    return db.Queryable<SC, Student>((sc, st) => sc.SId == st.SId)
-        //      .Where((sc, st) => sc.Score < 60)
-        //      .GroupBy((sc, st) => new { sc.SId, st.Sname })
-        //      .Having((sc, st) => SqlFunc.AggregateCount(sc.CId) >= 2)
-        //      .Select((sc, st) => new { sc.SId, st.Sname, avgScore = SqlFunc.AggregateAvg(sc.Score) })
-        //      .ToList();
-        //}
+        public List<StudentSC> Sql15()
+        {
+            return db.Queryable<SC, Student>((sc, st) => sc.SId == st.SId)
+              .Where((sc, st) => sc.Score < 60)
+              .GroupBy((sc, st) => new { sc.SId, st.Sname })
+              .Having((sc, st) => SqlFunc.AggregateCount(sc.CId) >= 2)
+              .Select((sc, st) => new StudentSC { StSId = sc.SId, StudentName = st.Sname, AvgScore = SqlFunc.AggregateAvg(sc.Score) })
+              .ToList();
+        }
 
         //select Sc.SId, St.Sname, Sc.sccc avgScore from
         //(select SId, AVG(score) sccc from SC group by SId having avg(score) < 60 and count(CId) >= 2) Sc,
         //(select Sname, SId from Student group by SId, Sname) St
         //WHERE St.SId = Sc.SId
-        public List<StudentSC> Sql15()
-        {
-            return db.Queryable(
-                     db.Queryable<SC>()
-                       .GroupBy(sc => sc.SId)
-                       .Having(sc => SqlFunc.AggregateAvg(sc.Score) < 60
-                                     && SqlFunc.AggregateCount(sc.CId) >= 2)
-                       .Select(sc => new StIdAvgScore { StSId = sc.SId, AvgScore = SqlFunc.AggregateAvg(sc.Score) }),
-                     db.Queryable<Student>()
-                       .GroupBy(st => new { st.SId, st.Sname })
-                       .Select(st => new SIdSname { StudentId = st.SId, StudentName = st.Sname }),
-                         (sc, st) => sc.StSId == st.StudentId
-                     )
-                     .Select((sc, st) => new StudentSC { StSId = sc.StSId, StudentName = st.StudentName, AvgScore = sc.AvgScore })
-                     .ToList();
-        }
+        //public List<StudentSC> Sql15()
+        //{
+        //    return db.Queryable(
+        //             db.Queryable<SC>()
+        //               .GroupBy(sc => sc.SId)
+        //               .Having(sc => SqlFunc.AggregateAvg(sc.Score) < 60
+        //                             && SqlFunc.AggregateCount(sc.CId) >= 2)
+        //               .Select(sc => new StIdAvgScore { StSId = sc.SId, AvgScore = SqlFunc.AggregateAvg(sc.Score) }),
+        //             db.Queryable<Student>()
+        //               .GroupBy(st => new { st.SId, st.Sname })
+        //               .Select(st => new SIdSname { StudentId = st.SId, StudentName = st.Sname }),
+        //                 (sc, st) => sc.StSId == st.StudentId
+        //             )
+        //             .Select((sc, st) => new StudentSC { StSId = sc.StSId, StudentName = st.StudentName, AvgScore = sc.AvgScore })
+        //             .ToList();
+        //}
 
 
         // 16、檢索"01"課程分數小於60，按分數降序排列的學生資訊
@@ -351,13 +345,6 @@ namespace ConsoleApp2
                              .ToList();
         }
         // 28.查詢出只有兩門課程的全部學生的學號和姓名
-        /*
-         select St.SId, St.Sname from Student St
-            join (select SId, COUNT(CId) countCid from SC group by SId) Sc
-            on St.SId = Sc.SId
-            where Sc.countCid = 2
-            group by St.SId, St.Sname
-         */
         public List<SIdSname> Sql28()
         {
             return db.Queryable<Student, SC>((st, sc) => st.SId == sc.SId)
@@ -390,11 +377,13 @@ namespace ConsoleApp2
         //public List<Student> Sql31()
         //{
         //    return db.Queryable<Student>()
-        //                     .Where(st => st.Sage.Year == 1990)
+        //                     .Where(st => SqlFunc.DateValue(st.Sage) == 1990)
         //                     .ToList();
         //}
         // 32.查詢平均成績大於等於85的所有學生的學號、姓名和平均成績
+
         // 33.查詢每門課程的平均成績，結果按平均成績升序排序，平均成績相同時，按課程號降序排列
+
         /*
          select CId,AVG(score) as avgScore from SC
         group by CId
@@ -410,8 +399,37 @@ namespace ConsoleApp2
                 
         }
         // 34.查詢課程名稱為"數學"，且分數低於60的學生姓名和分數
+        public List<StudentScore> Sql34()
+        { 
+            return db.Queryable<Student, SC, Course>((st, sc, c) => st.SId == sc.SId && sc.CId == c.CId)
+                           .Where((st, sc, c) => c.Cname == "數學" && sc.Score < 60)
+                           .Select((st, sc, c) => new StudentScore{ Sname = st.Sname, Cname = c.Cname ,Score = sc.Score })
+                           .ToList();
+        }
         // 35.查詢所有學生的課程及分數情況
+        public List<StudentScore> Sql35()
+        { 
+            return db.Queryable<Student, SC, Course > ((st, sc, c) => st.SId == sc.SId && sc.CId == c.CId)
+               .Select((st, sc, c) => new StudentScore { Sname = st.Sname, Cname = c.Cname, Score = sc.Score })
+               .ToList();
+        }
         // 36.查詢任何一門課程成績在70分以上的姓名、課程名稱和分數
+        /*
+         select distinct St.Sname, C.Cname, Sc.score from SC Sc
+            join Student St on St.SId = Sc.SId
+            join Course C on Sc.CId = C.CId
+            where Sc.score >= 70
+         */
+        public List<StudentScore> Sql36()
+        {
+            return db.Queryable<SC>()
+                .InnerJoin<Student>((sc, st) => sc.SId == st.SId)
+                .InnerJoin<Course>((sc, st, c) => sc.CId == c.CId)
+                .Where((sc, st, c) => sc.Score >= 70)
+                .Distinct()
+                .Select((sc, st, c) => new StudentScore { Sname = st.Sname, Cname = c.Cname, Score = sc.Score })
+                .ToList();
+        }
         // 37.查詢不及格的課程並按課程號從大到小排列
         public List<CourseID> Sql37()
         {
@@ -438,10 +456,11 @@ namespace ConsoleApp2
                            .ToList();
         }
         // 40.查詢選修「張三」老師所授課程的學生中成績最高的學生姓名及其成績
+
         // 41.查詢不同課程成績相同的學生的學生編號、課程編號、學生成績 （難）
 
         // 分组查询和使用
-        // 統計每門課程的學生選修人數（超過5人的課程才統計）。要求輸出課程號和選修人數，查詢結果按人數降序排列，若人數相同，按課程號升序排列
+        // 42.統計每門課程的學生選修人數（超過5人的課程才統計）。要求輸出課程號和選修人數，查詢結果按人數降序排列，若人數相同，按課程號升序排列
         public List<CountCourse> Sql42()
         {
             return db.Queryable<SC>()
@@ -451,7 +470,7 @@ namespace ConsoleApp2
                 .Select(sc => new CountCourse { CId = sc.CId, CountAmount = SqlFunc.AggregateCount(sc.CId) })
                 .ToList();
         }
-        // 至少選修兩門課程的學生學號
+        // 43.至少選修兩門課程的學生學號
         public List<StudentID> Sql43()
         {
             return db.Queryable<SC>()
