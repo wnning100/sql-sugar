@@ -63,12 +63,12 @@ namespace Console_ConfigTest
                 Console.WriteLine($"學號:{n6[i].StudentId},姓名:{n6[i].StudentName}");
             }
             // 7 
-            //var n7 = Class1.Instance.Sql7();
-            //Console.WriteLine(7);
-            //for (int i = 0; i < n7.Count; i++)
-            //{
-            //    Console.WriteLine($"學號:{n7[i].StudentId},姓名:{n7[i].StudentName}");
-            //}
+            var n7 = Class1.Instance.Sql7();
+            Console.WriteLine(7);
+            for (int i = 0; i < n7.Count; i++)
+            {
+                Console.WriteLine($"學號:{n7[i].StudentId},姓名:{n7[i].StudentName}");
+            }
 
             // 8
             var n8 = Class1.Instance.Sql8();

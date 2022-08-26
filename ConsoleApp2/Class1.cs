@@ -154,6 +154,25 @@ namespace ConsoleApp2
          ) result
          ON result.SId = st.SId;
          */
+        public List<SIdSname> Sql7()
+        {
+            return db.Queryable(
+                                   db.Queryable<Student>(),
+                                   db.Queryable(
+                                       db.Queryable<SC>()
+                                        .GroupBy(sc => new { sc.SId, sc.CId })
+                                        .Having(sc => sc.CId == "01" || sc.CId == "02")
+                                        .Select(sc => new SIdCId { SId = sc.SId, CId = sc.CId })
+                                    )
+                                    .GroupBy(x => new { x.SId })
+                                    .Having(x => SqlFunc.AggregateCount(x.SId) == 2)
+                                    .Select(x => new StudentID { SID = x.SId })
+                                    , JoinType.Right
+                                    , (st, x) => st.SId == x.SID
+                            )
+                            .Select((st, x) => new SIdSname { StudentId = st.SId, StudentName = st.Sname })
+                            .ToList();
+        }
         // 8. 查詢課程編號為「02」的總成績
         public decimal Sql8()
         {
